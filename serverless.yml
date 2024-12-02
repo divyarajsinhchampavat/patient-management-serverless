@@ -1,0 +1,39 @@
+service: patient-management-api-express
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-northeast-2  # Correct region
+
+functions:
+  app:
+    handler: dist/app.handler
+    events:
+      - httpApi:
+          path: /
+          method: ANY
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+           
+resources:
+  Resources:
+    PatientsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Patients
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+      Condition: CreateDynamoDBTable  # Ensure that this line is indented properly
+
+  Conditions:
+    CreateDynamoDBTable:
+      Fn::Not:
+        - Fn::Equals:
+            - Ref: "AWS::Region"
+            - "ap-northeast-2"  # Ensure that this condition matches the region you're deploying to

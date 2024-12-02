@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /patients",
+  "rawPath": "/patients",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/patients"
+    }
+  },
+  "body": "{\"name\": \"John Doe\", \"address\": \"123 Main St\", \"conditions\": [\"Diabetes\"], \"allergies\": [\"Peanuts\"]}",
+  "isBase64Encoded": false
+}
