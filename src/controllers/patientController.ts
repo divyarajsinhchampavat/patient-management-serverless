@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addPatient, getPatients, getPatientById, deletePatient,updatePatient,searchPatientsByCondition } from '../services/patientService';
+import { addPatient, getPatients, getPatientById, deletePatient,updatePatient, searchPatientsByaddress , searchPatientsByConditionOpenSearch} from '../services/patientService';
 import { createPatient } from '../models/Patient';
 
 export const createPatientHandler = async (req: Request, res: Response) => {
@@ -45,13 +45,30 @@ export const deletePatientHandler = async (req: Request, res: Response) => {
 };
 
 // Search patients by condition (OpenSearch)
-export const searchPatientsByConditionHandler = async (req: Request, res: Response) => {
-    const { condition } = req.query;  // Get the condition from the query string
+export const searchPatientsByAddressHandler = async (req: Request, res: Response) => {
+    const { address } = req.query;  // Get the condition from the query string
 
     try {
-      const patients = await searchPatientsByCondition(condition as string);
+      const patients = await searchPatientsByaddress(address as string);
       return res.status(200).json(patients) as any;
     } catch (error) {
       return res.status(500).json({ message: 'Error searching patients', error: error });
     }
   };
+
+  export const searchPatientsByConditionHandlerOpenSearch = async (req: Request, res: Response) => {
+    const { condition } = req.query; // Get the condition from the query string
+  
+    if (!condition) {
+      return res.status(400).json({ message: 'Condition is required for search' });
+    }
+  
+    try {
+      const patients = await searchPatientsByConditionOpenSearch(condition as string);
+      return res.status(200).json(patients) as any;
+    } catch (error) {
+      console.error('Error searching patients:', error);
+      return res.status(500).json({ message: 'Error searching patients', error: error });
+    }
+  };
+  

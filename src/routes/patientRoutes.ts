@@ -5,14 +5,16 @@ import {
   getPatientByIdHandler,
   updatePatientHandler,
   deletePatientHandler,
-  searchPatientsByConditionHandler,
+  searchPatientsByAddressHandler,
+  searchPatientsByConditionHandlerOpenSearch,
 
 } from '../controllers/patientController';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/search', authenticate, searchPatientsByConditionHandler);
+router.get('/search/address', authenticate, searchPatientsByAddressHandler);
+router.get('/search/condition',authenticate, searchPatientsByConditionHandlerOpenSearch);
 router.post('/', authenticate, createPatientHandler);
 router.get('/', authenticate, getPatientsHandler);
 router.put('/:id', authenticate, updatePatientHandler);

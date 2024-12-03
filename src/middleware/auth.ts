@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 
 // Fetch Cognito public keys
 const client = jwksClient({
-  jwksUri: `https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_6VQb4fuyB/.well-known/jwks.json`, // Replace with your User Pool ID and region
+  jwksUri: `${process.env.JWKSURI}`, // Replace with your User Pool ID and region
 });
 
 // Get the public key
@@ -31,8 +31,8 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
   jwt.verify(token, getKey, {}, (err, decoded) => {
     if (err) {
-      console.error('JWT verification failed:', err.message);
-      res.status(403).json({ error: 'Forbidden' });
+      console.error('JWT verification failed:', err?.message);
+      res.status(403).json({ error: err?.message || 'Forbidden' });
       return;
     }
     (req as any).user = decoded;

@@ -1,10 +1,9 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import serverless from 'serverless-http';
 import patientRoutes from './routes/patientRoutes';
-import dotenv from 'dotenv';
-dotenv.config();
 const app = express();
-
 app.use(express.json());
 
 // Your routes
