@@ -24,13 +24,17 @@ This is a serverless REST API built using Node.js, TypeScript, and AWS services 
    ```bash
    npm install
 
-2. Build the project:
+3. Build the project:
    ```bash
    npm run build
    
-2. Start the project locally:
+4. Start the project locally:
    ```bash
    npm run dev
+
+5. Run the test cases:
+   ```bash
+   npm test
    
 ## Setup Instructions
 ### Patient CRUD
