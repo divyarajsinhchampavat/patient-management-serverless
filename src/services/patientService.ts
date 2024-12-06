@@ -2,14 +2,14 @@ import { dynamoClient } from '../utils/dynamoClient';
 import { Patient } from '../models/Patient';
 import openSearchClient from '../utils/penSearchClient';
 const TABLE_NAME = 'Patients';
-// Add a patient
+//ANCHOR - Add a patient
 export const addPatient = async (patient: Patient): Promise<void> => {
   const params = {
     TableName: TABLE_NAME,
     Item: patient,
   };
   await dynamoClient.put(params).promise();
-   // Index patient in OpenSearch
+   //ANCHOR -  Index patient in OpenSearch
    const openSearchParams = {
     index: 'patients', // OpenSearch index name
     id: patient.id,    // Unique document ID
@@ -19,14 +19,14 @@ export const addPatient = async (patient: Patient): Promise<void> => {
   await openSearchClient.index(openSearchParams);
 };
 
-// Get all patient
+//ANCHOR - Get all patient
 export const getPatients = async (): Promise<Patient[]> => {
   const params = { TableName: TABLE_NAME };
   const data = await dynamoClient.scan(params).promise();
   return data.Items as Patient[];
 };
 
-// Get a patient by id
+//ANCHOR - Get a patient by id
 export const getPatientById = async (id: string): Promise<Patient | null> => {
   const params = {
     TableName: TABLE_NAME,
@@ -36,7 +36,7 @@ export const getPatientById = async (id: string): Promise<Patient | null> => {
   return data.Item as Patient;
 };
 
-// Update a patient
+//ANCHOR - Update a patient
 export const updatePatient = async (id: string, updatedData: Partial<Patient>): Promise<Patient | null> => {
   const params = {
     TableName: TABLE_NAME,
@@ -60,7 +60,7 @@ export const updatePatient = async (id: string, updatedData: Partial<Patient>): 
   const result = await dynamoClient.update(params).promise();
   const updatedPatient = result.Attributes as Patient;
 
-  // Update patient data in OpenSearch
+  //ANCHOR - Update patient data in OpenSearch
   const openSearchParams = {
     index: 'patients',
     id,
@@ -71,29 +71,44 @@ export const updatePatient = async (id: string, updatedData: Partial<Patient>): 
   return result.Attributes as Patient;
 };
 
-export const deletePatient = async (id: string): Promise<void> => {
-  const params = {
-    TableName: TABLE_NAME,
-    Key: { id },
-  };
+//ANCHOR - Delete a patient
+export const deletePatient = async (id: string): Promise<{ message: string }> => {
   try {
-    // Delete patient from DynamoDB
+    //ANCHOR - Check if the patient exists in DynamoDB
+    const params = {
+      TableName: TABLE_NAME,
+      Key: { id },
+    };
+    const patient = await dynamoClient.get(params).promise();
+
+    if (!patient.Item) {
+      return { message: `Patient with ID: ${id} not found in DynamoDB` };
+    }
+
+    //ANCHOR - Delete patient from DynamoDB
     await dynamoClient.delete(params).promise();
 
-    // Remove the patient from OpenSearch index
-    await openSearchClient.delete({
-      index: 'patients',
-      id,               
-    });
-    console.log(`Successfully deleted patient with ID: ${id}`);
+    //ANCHOR - Attempt to delete from OpenSearch, but handle case where it doesn't exist
+    try {
+      const osResponse = await openSearchClient.delete({
+        index: 'patients',
+        id,
+      });
+
+      if (osResponse.body.result === 'not_found') {
+        console.warn(`Patient with ID: ${id} not found in OpenSearch`);
+      }
+    } catch (osError) {
+      console.error(`Error deleting patient from OpenSearch: ${osError}`);
+    }
+    return { message: `Successfully deleted patient with ID: ${id}` }as any;
   } catch (error) {
     console.error(`Failed to delete patient with ID: ${id}`, error);
     throw new Error(`Error deleting patient with ID: ${id}`);
   }
 };
 
-
-// Search patients by address directly from DynamoDB (No OpenSearch)
+//ANCHOR - Search patients by address directly from DynamoDB (No OpenSearch)
 export const searchPatientsByaddress = async (address: string): Promise<Patient[]> => {
   try {
     const params = {
@@ -107,10 +122,10 @@ export const searchPatientsByaddress = async (address: string): Promise<Patient[
       },
     };
 
-    // Scan the table for matching address
+    //ANCHOR - Scan the table for matching address
     const data = await dynamoClient.scan(params).promise();
     
-    // Return matching patients
+    //ANCHOR - Return matching patients
     return data.Items as Patient[];
   } catch (error) {
     console.error('Error searching patients in DynamoDB:', error);
@@ -119,19 +134,19 @@ export const searchPatientsByaddress = async (address: string): Promise<Patient[
 };
 
 
-// Search patients by condition using OpenSearch
+//ANCHOR - Search patients by condition using OpenSearch
 export const searchPatientsByConditionOpenSearch = async (condition: string): Promise<Patient[]> => {
   const searchParams = {
     index: 'patients',
     body: {
       query: {
         match: {
-          conditions: condition, // Match condition in patient data
+          conditions: condition, //ANCHOR - Match condition in patient data
         },
       },
     },
   };
 
   const response = await openSearchClient.search(searchParams);
-  return response.body.hits.hits.map((hit: any) => hit._source); // Extract and return patient data
+  return response.body.hits.hits.map((hit: any) => hit._source); //ANCHOR - Extract and return patient data
 };

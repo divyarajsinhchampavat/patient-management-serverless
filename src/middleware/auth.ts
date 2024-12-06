@@ -2,12 +2,12 @@ import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { Request, Response, NextFunction } from 'express';
 
-// Fetch Cognito public keys
+//ANCHOR - Fetch Cognito public keys
 const client = jwksClient({
-  jwksUri: `${process.env.JWKSURI}`, // Replace with your User Pool ID and region
+  jwksUri: `${process.env.JWKSURI}`, 
 });
 
-// Get the public key
+//ANCHOR - Get the public key
 const getKey = (header: any, callback: any) => {
   client.getSigningKey(header.kid, (err, key) => {
     if (err || !key) {
@@ -19,7 +19,7 @@ const getKey = (header: any, callback: any) => {
   });
 };
 
-// Middleware to verify the JWT
+//ANCHOR - Middleware to verify the JWT
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {

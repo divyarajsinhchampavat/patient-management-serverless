@@ -3,7 +3,7 @@ import { dynamoClient } from '../utils/dynamoClient';
 import openSearchClient from '../utils/penSearchClient';
 import { Patient } from '../models/Patient';
 
-// Mock the dependencies
+//ANCHOR - Mock the dependencies
 jest.mock('../utils/dynamoClient', () => ({
   dynamoClient: {
     put: jest.fn().mockReturnValue({
@@ -50,16 +50,16 @@ describe('PatientService', () => {
         allergies: ['Peanuts'],
       };
 
-      // Call the function
+      //ANCHOR - Call the function
       await patientService.addPatient(mockPatient);
 
-      // Verify DynamoDB put call
+      //ANCHOR - Verify DynamoDB put call
       expect(dynamoClient.put).toHaveBeenCalledWith({
         TableName: 'Patients',
         Item: mockPatient,
       });
 
-      // Verify OpenSearch index call
+      //ANCHOR - Verify OpenSearch index call
       expect(openSearchClient.index).toHaveBeenCalledWith({
         index: 'patients',
         id: '892b83e8-8ee0-48f6-a817-49eba8e93577',
@@ -128,16 +128,16 @@ describe('PatientService', () => {
     it('should delete a patient and remove it from OpenSearch', async () => {
       const mockId = '892b83e8-8ee0-48f6-a817-49eba8e93577';
 
-      // Call the function
+      //ANCHOR - Call the function
       await patientService.deletePatient(mockId);
 
-      // Verify DynamoDB delete call
+      //ANCHOR - Verify DynamoDB delete call
       expect(dynamoClient.delete).toHaveBeenCalledWith({
         TableName: 'Patients',
         Key: { id: mockId },
       });
 
-      // Verify OpenSearch delete call
+      //ANCHOR - Verify OpenSearch delete call
       expect(openSearchClient.delete).toHaveBeenCalledWith({
         index: 'patients',
         id: mockId,
